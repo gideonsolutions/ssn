@@ -33,12 +33,12 @@ pub struct Ssn {
 pub enum SsnParseError {
     #[error("invalid format: expected XXX-XX-XXXX or XXXXXXXXX")]
     InvalidFormat,
-    #[error("invalid area number: {0}")]
+    #[error("invalid area number: {0} (must be 001-665 or 667-899)")]
     InvalidArea(u16),
-    #[error("invalid group number: 00")]
-    InvalidGroup,
-    #[error("invalid serial number: 0000")]
-    InvalidSerial,
+    #[error("invalid group number: {0} (must be 01-99)")]
+    InvalidGroup(u8),
+    #[error("invalid serial number: {0} (must be 0001-9999)")]
+    InvalidSerial(u16),
 }
 
 impl Ssn {
@@ -57,18 +57,18 @@ impl Ssn {
     /// Validates SSN components per SSA rules.
     ///
     /// Per <https://secure.ssa.gov/poms.nsf/lnx/0110201035>:
-    /// - Area number (first 3 digits) cannot be 000, 666, or 900-999
-    /// - Group number (middle 2 digits) cannot be 00
-    /// - Serial number (last 4 digits) cannot be 0000
+    /// - Area number (first 3 digits) must be 001-665, 667-899 (not 000, 666, or 900-999)
+    /// - Group number (middle 2 digits) must be 01-99 (not 00)
+    /// - Serial number (last 4 digits) must be 0001-9999 (not 0000)
     fn validate(area: u16, group: u8, serial: u16) -> Result<(), SsnParseError> {
-        if area == 0 || area == 666 || (900..=999).contains(&area) {
+        if area == 0 || area == 666 || area > 899 {
             return Err(SsnParseError::InvalidArea(area));
         }
-        if group == 0 {
-            return Err(SsnParseError::InvalidGroup);
+        if group == 0 || group > 99 {
+            return Err(SsnParseError::InvalidGroup(group));
         }
-        if serial == 0 {
-            return Err(SsnParseError::InvalidSerial);
+        if serial == 0 || serial > 9999 {
+            return Err(SsnParseError::InvalidSerial(serial));
         }
         Ok(())
     }
@@ -93,7 +93,8 @@ impl FromStr for Ssn {
     type Err = SsnParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let re = Regex::new(SSN_PATTERN).unwrap();
+        let re = Regex::new(SSN_PATTERN)
+            .expect("SSN_PATTERN is a valid regex: two alternates for dashed and undashed formats");
         let caps = re.captures(s).ok_or(SsnParseError::InvalidFormat)?;
 
         let (area, group, serial) =
@@ -199,13 +200,31 @@ mod tests {
     #[test]
     fn invalid_group_00() {
         let result: Result<Ssn, _> = "123-00-6789".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidGroup)));
+        assert!(matches!(result, Err(SsnParseError::InvalidGroup(0))));
     }
 
     #[test]
     fn invalid_serial_0000() {
         let result: Result<Ssn, _> = "123-45-0000".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidSerial)));
+        assert!(matches!(result, Err(SsnParseError::InvalidSerial(0))));
+    }
+
+    #[test]
+    fn invalid_area_out_of_bounds() {
+        let result = Ssn::new(1000, 45, 6789);
+        assert!(matches!(result, Err(SsnParseError::InvalidArea(1000))));
+    }
+
+    #[test]
+    fn invalid_group_out_of_bounds() {
+        let result = Ssn::new(123, 100, 6789);
+        assert!(matches!(result, Err(SsnParseError::InvalidGroup(100))));
+    }
+
+    #[test]
+    fn invalid_serial_out_of_bounds() {
+        let result = Ssn::new(123, 45, 10000);
+        assert!(matches!(result, Err(SsnParseError::InvalidSerial(10000))));
     }
 
     #[test]
