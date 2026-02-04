@@ -111,13 +111,13 @@ impl FromStr for Ssn {
 
         let area: u16 = area
             .parse()
-            .map_err(|_| SsnParseError::InvalidFormat(s.to_owned()))?;
+            .expect("area is exactly three ASCII digits as enforced by SSN_PATTERN; parse::<u16> cannot fail");
         let group: u8 = group
             .parse()
-            .map_err(|_| SsnParseError::InvalidFormat(s.to_owned()))?;
+            .expect("group is exactly two ASCII digits as enforced by SSN_PATTERN; parse::<u8> cannot fail");
         let serial: u16 = serial
             .parse()
-            .map_err(|_| SsnParseError::InvalidFormat(s.to_owned()))?;
+            .expect("serial is exactly four ASCII digits as enforced by SSN_PATTERN; parse::<u16> cannot fail");
 
         Self::new(area, group, serial)
     }
