@@ -1,12 +1,13 @@
 [package]
 name = "ssn"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "Apache-2.0"
 description = "U.S. Social Security Number (SSN) parsing and validation"
 repository = "https://github.com/gideonsolutions/ssn"
 keywords = ["ssn", "social-security", "tax", "validation"]
 categories = ["parsing", "value-formatting"]
+documentation = "https://docs.rs/ssn"
 
 [dependencies]
 regex = "1"
