@@ -56,7 +56,7 @@ pub enum SsnParseError {
 impl Ssn {
     /// Creates a new SSN from its components.
     ///
-    /// Returns an error if the components violate SSA rules.
+    /// Returns an error if the components violate Social Security Administration rules.
     pub fn new(area: u16, group: u8, serial: u16) -> Result<Self, SsnParseError> {
         Self::validate(area, group, serial)?;
         Ok(Self {
@@ -66,7 +66,7 @@ impl Ssn {
         })
     }
 
-    /// Validates SSN components per SSA rules.
+    /// Validates SSN components per Social Security Administration rules.
     ///
     /// Per <https://secure.ssa.gov/poms.nsf/lnx/0110201035>:
     /// - Area number (first 3 digits) must be 001-665, 667-899 (not 000, 666, or 900-999)
