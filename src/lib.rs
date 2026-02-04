@@ -31,12 +31,24 @@ pub struct Ssn {
 /// Errors that can occur when parsing an SSN.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum SsnParseError {
+    /// The input string does not match the expected SSN format.
+    ///
+    /// SSNs must be in either `XXX-XX-XXXX` (with dashes) or `XXXXXXXXX` (9 consecutive digits) format.
     #[error("invalid format '{0}': expected XXX-XX-XXXX or XXXXXXXXX")]
     InvalidFormat(String),
+    /// The area number (first 3 digits) is invalid per Social Security Administration rules.
+    ///
+    /// Valid area numbers are 001-665 and 667-899. Area 000, 666, and 900-999 are not assigned.
     #[error("invalid area number: {0} (must be 001-665 or 667-899)")]
     InvalidArea(u16),
+    /// The group number (middle 2 digits) is invalid per Social Security Administration rules.
+    ///
+    /// Valid group numbers are 01-99. Group 00 is not assigned.
     #[error("invalid group number: {0} (must be 01-99)")]
     InvalidGroup(u8),
+    /// The serial number (last 4 digits) is invalid per Social Security Administration rules.
+    ///
+    /// Valid serial numbers are 0001-9999. Serial 0000 is not assigned.
     #[error("invalid serial number: {0} (must be 0001-9999)")]
     InvalidSerial(u16),
 }
