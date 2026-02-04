@@ -112,9 +112,9 @@ impl FromStr for Ssn {
         let area: u16 = area
             .parse()
             .expect("area is exactly three ASCII digits as enforced by SSN_PATTERN; parse::<u16> cannot fail");
-        let group: u8 = group
-            .parse()
-            .expect("group is exactly two ASCII digits as enforced by SSN_PATTERN; parse::<u8> cannot fail");
+        let group: u8 = group.parse().expect(
+            "group is exactly two ASCII digits as enforced by SSN_PATTERN; parse::<u8> cannot fail",
+        );
         let serial: u16 = serial
             .parse()
             .expect("serial is exactly four ASCII digits as enforced by SSN_PATTERN; parse::<u16> cannot fail");
