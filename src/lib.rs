@@ -31,8 +31,8 @@ pub struct Ssn {
 /// Errors that can occur when parsing an SSN.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum SsnParseError {
-    #[error("invalid format: expected XXX-XX-XXXX or XXXXXXXXX")]
-    InvalidFormat,
+    #[error("invalid format '{0}': expected XXX-XX-XXXX or XXXXXXXXX")]
+    InvalidFormat(String),
     #[error("invalid area number: {0} (must be 001-665 or 667-899)")]
     InvalidArea(u16),
     #[error("invalid group number: {0} (must be 01-99)")]
@@ -95,7 +95,9 @@ impl FromStr for Ssn {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let re = Regex::new(SSN_PATTERN)
             .expect("SSN_PATTERN is a valid regex: two alternates for dashed and undashed formats");
-        let caps = re.captures(s).ok_or(SsnParseError::InvalidFormat)?;
+        let caps = re
+            .captures(s)
+            .ok_or_else(|| SsnParseError::InvalidFormat(s.to_owned()))?;
 
         let (area, group, serial) =
             if let (Some(a), Some(g), Some(s)) = (caps.get(1), caps.get(2), caps.get(3)) {
@@ -104,12 +106,18 @@ impl FromStr for Ssn {
                 let full = full.as_str();
                 (&full[0..3], &full[3..5], &full[5..9])
             } else {
-                return Err(SsnParseError::InvalidFormat);
+                return Err(SsnParseError::InvalidFormat(s.to_owned()));
             };
 
-        let area: u16 = area.parse().map_err(|_| SsnParseError::InvalidFormat)?;
-        let group: u8 = group.parse().map_err(|_| SsnParseError::InvalidFormat)?;
-        let serial: u16 = serial.parse().map_err(|_| SsnParseError::InvalidFormat)?;
+        let area: u16 = area
+            .parse()
+            .map_err(|_| SsnParseError::InvalidFormat(s.to_owned()))?;
+        let group: u8 = group
+            .parse()
+            .map_err(|_| SsnParseError::InvalidFormat(s.to_owned()))?;
+        let serial: u16 = serial
+            .parse()
+            .map_err(|_| SsnParseError::InvalidFormat(s.to_owned()))?;
 
         Self::new(area, group, serial)
     }
@@ -148,32 +156,37 @@ mod tests {
 
     #[test]
     fn invalid_format_with_plus() {
-        let result: Result<Ssn, _> = "213+21-2342".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidFormat)));
+        let input = "213+21-2342";
+        let result: Result<Ssn, _> = input.parse();
+        assert_eq!(result, Err(SsnParseError::InvalidFormat(input.to_owned())));
     }
 
     #[test]
     fn invalid_format_with_asterisks() {
-        let result: Result<Ssn, _> = "213*13*3322*".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidFormat)));
+        let input = "213*13*3322*";
+        let result: Result<Ssn, _> = input.parse();
+        assert_eq!(result, Err(SsnParseError::InvalidFormat(input.to_owned())));
     }
 
     #[test]
     fn invalid_format_mixed_separators() {
-        let result: Result<Ssn, _> = "123-456789".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidFormat)));
+        let input = "123-456789";
+        let result: Result<Ssn, _> = input.parse();
+        assert_eq!(result, Err(SsnParseError::InvalidFormat(input.to_owned())));
     }
 
     #[test]
     fn invalid_format_partial_dashes() {
-        let result: Result<Ssn, _> = "123-45-678".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidFormat)));
+        let input = "123-45-678";
+        let result: Result<Ssn, _> = input.parse();
+        assert_eq!(result, Err(SsnParseError::InvalidFormat(input.to_owned())));
     }
 
     #[test]
     fn invalid_format_letters() {
-        let result: Result<Ssn, _> = "12a-45-6789".parse();
-        assert!(matches!(result, Err(SsnParseError::InvalidFormat)));
+        let input = "12a-45-6789";
+        let result: Result<Ssn, _> = input.parse();
+        assert_eq!(result, Err(SsnParseError::InvalidFormat(input.to_owned())));
     }
 
     #[test]
