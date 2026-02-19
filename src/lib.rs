@@ -40,7 +40,7 @@ static TIN_PATTERN: &str = r"^(\d{3})-(\d{2})-(\d{4})$|^(\d{9})$";
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ParseError {
     /// The input string does not match the expected format.
-    #[error("invalid format '{0}': expected XXX-XX-XXXX or XXXXXXXXX")]
+    #[error("invalid format: expected XXX-XX-XXXX or XXXXXXXXX")]
     InvalidFormat(String),
     /// The area number (first 3 digits) is invalid for the target type.
     #[error("invalid area number: {0}")]
