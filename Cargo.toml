@@ -1,13 +1,13 @@
 [package]
-name = "ssn"
-version = "0.1.1"
+name = "tin"
+version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
-description = "U.S. Social Security Number (SSN) parsing and validation"
-repository = "https://github.com/gideonsolutions/ssn"
-keywords = ["ssn", "social-security", "tax", "validation"]
+description = "U.S. Taxpayer Identification Number (TIN) parsing and validation — SSN, ITIN, and ATIN"
+repository = "https://github.com/gideonsolutions/tin"
+keywords = ["tin", "ssn", "itin", "tax", "validation"]
 categories = ["parsing", "value-formatting"]
-documentation = "https://docs.rs/ssn"
+documentation = "https://docs.rs/tin"
 
 [dependencies]
 regex = "1"
