@@ -25,7 +25,7 @@ Your commit messages determine the version bump:
 You can also indicate a breaking change by adding a `BREAKING CHANGE:` footer in the commit body:
 
 ```
-feat: change SSN parsing rules
+feat: change TIN parsing rules
 
 BREAKING CHANGE: existing callers may see different validation behavior
 ```
@@ -43,7 +43,7 @@ Other common types (no version bump):
 ```
 fix: handle edge case in SSN validation
 feat: add support for ITIN parsing
-feat!: rename Ssn::new to Ssn::try_new
+feat!: rename ParseError variants
 docs: improve API documentation
 ```
 
