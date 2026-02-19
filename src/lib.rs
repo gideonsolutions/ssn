@@ -34,7 +34,7 @@ pub use itin::Itin;
 pub use ssn::Ssn;
 
 /// Matches the `XXX-XX-XXXX` or `XXXXXXXXX` format shared by SSN, ITIN, and ATIN.
-static TIN_PATTERN: &str = r"^(\d{3})-(\d{2})-(\d{4})$|^(\d{9})$";
+static TIN_PATTERN: &str = r"\A(?:(\d{3})-(\d{2})-(\d{4})|(\d{9}))\z";
 
 /// Errors that can occur when parsing a TIN.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
