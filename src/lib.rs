@@ -26,6 +26,7 @@ mod ssn;
 
 use core::fmt;
 use core::str::FromStr;
+use std::sync::LazyLock;
 
 use regex::Regex;
 
@@ -33,8 +34,11 @@ pub use atin::Atin;
 pub use itin::Itin;
 pub use ssn::Ssn;
 
-/// Matches the `XXX-XX-XXXX` or `XXXXXXXXX` format shared by SSN, ITIN, and ATIN.
-static TIN_PATTERN: &str = r"\A(?:(\d{3})-(\d{2})-(\d{4})|(\d{9}))\z";
+/// Compiled regex for matching the `XXX-XX-XXXX` or `XXXXXXXXX` format.
+static TIN_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\A(?:(\d{3})-(\d{2})-(\d{4})|(\d{9}))\z")
+        .expect("TIN_RE is a valid regex: two alternates for dashed and undashed formats")
+});
 
 /// Errors that can occur when parsing a TIN.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -55,9 +59,7 @@ pub enum ParseError {
 
 /// Parses a `XXX-XX-XXXX` or `XXXXXXXXX` string into `(area, group, serial)` components.
 pub fn parse_components(s: &str) -> Result<(u16, u8, u16), ParseError> {
-    let re = Regex::new(TIN_PATTERN)
-        .expect("TIN_PATTERN is a valid regex: two alternates for dashed and undashed formats");
-    let caps = re
+    let caps = TIN_RE
         .captures(s)
         .ok_or_else(|| ParseError::InvalidFormat(s.to_owned()))?;
 
